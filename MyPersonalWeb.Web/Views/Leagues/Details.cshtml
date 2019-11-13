@@ -41,7 +41,7 @@ else
             <tr>
                 <th>
                     @Html.DisplayNameFor(model => model.Teams.FirstOrDefault().Name)
-                </th>                
+                </th>
                 <th></th>
             </tr>
         </thead>
@@ -53,11 +53,32 @@ else
                         @Html.DisplayFor(modelItem => item.Name)
                     </td>
                     <td>
-                        <a asp-action="EditTeam" asp-route-id="@item.TeamId" class="btn btn-warning">Edit Equipo</a>                        
+                        <a asp-action="EditTeam" asp-route-id="@item.TeamId" class="btn btn-warning">Edit Equipo</a>
                         <button data-id="@item.TeamId" class="btn btn-danger deleteItem" data-toggle="modal" data-target="#deleteDialog">Borrar Equipo</button>
                     </td>
                 </tr>
             }
         </tbody>
     </table>
+}
+
+<partial name="_DeleteDialog" />
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script type="text/javascript">
+    	$(document).ready(function () {
+        	// Delete item
+        	var item_to_delete;
+
+        	$('.deleteItem').click((e) => {
+            	item_to_delete = e.currentTarget.dataset.id;
+        	});
+
+        	$("#btnYesDelete").click(function () {
+            	window.location.href = '/Leagues/DeleteTeam/' + item_to_delete;
+        	});
+    	});
+    </script>
 }

@@ -229,5 +229,49 @@ namespace MyPersonalWeb.Web.Controllers
             
             return View(model);
         }
+
+        public async Task<IActionResult> DeleteTeam(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var team = await _context.Teams.Include(p => p.League)
+                .FirstOrDefaultAsync(h => h.TeamId == id.Value);
+            if (team == null)
+            {
+                return NotFound();
+            }
+
+            _context.Teams.Remove(team);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> DeleteLeague(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var league = await _context.Leagues.Include(p => p.Teams)
+                .FirstOrDefaultAsync(h => h.LeagueId == id.Value);
+            if (league == null)
+            {
+                return NotFound();
+            }
+
+            if (league.Teams.Count > 0)
+            {
+                ModelState.AddModelError(string.Empty, "La liga no puede ser borrada porque tiene equipos registrados.");
+                return RedirectToAction($"{nameof(Details)}/{league.LeagueId}");
+            }
+
+            _context.Leagues.Remove(league);
+            await _context.SaveChangesAsync();
+            return RedirectToAction($"{nameof(Details)}/{league.LeagueId}");
+        }
     }
 }

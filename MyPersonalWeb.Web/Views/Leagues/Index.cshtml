@@ -14,7 +14,7 @@
         <tr>
             <th>
                 @Html.DisplayNameFor(model => model.FirstOrDefault().Name)
-            </th>            
+            </th>
             <th>
                 # Equipos
             </th>
@@ -27,16 +27,37 @@
             <tr>
                 <td>
                     @Html.DisplayFor(modelItem => item.Name)
-                </td>                
+                </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Teams.Count)
                 </td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.LeagueId" class="btn btn-warning">Edit</a>
                     <a asp-action="Details" asp-route-id="@item.LeagueId" class="btn btn-info">Details</a>
-                    <a asp-action="Delete" asp-route-id="@item.LeagueId" class="btn btn-danger">Delete</a>
+                    <button data-id="@item.LeagueId" class="btn btn-danger deleteItem" data-toggle="modal" data-target="#deleteDialog">Delete</button>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
+<partial name="_DeleteDialog" />
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script type="text/javascript">
+    	$(document).ready(function () {
+        	// Delete item
+        	var item_to_delete;
+
+        	$('.deleteItem').click((e) => {
+            	item_to_delete = e.currentTarget.dataset.id;
+        	});
+
+        	$("#btnYesDelete").click(function () {
+            	window.location.href = '/Leagues/DeleteLeague/' + item_to_delete;
+        	});
+    	});
+    </script>
+}

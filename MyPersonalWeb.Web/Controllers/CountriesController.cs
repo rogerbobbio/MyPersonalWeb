@@ -163,5 +163,23 @@ namespace MyPersonalWeb.Web.Controllers
         {
             return _context.Countries.Any(e => e.Name == country);
         }
+
+        public async Task<IActionResult> DeleteCountry(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var country = await _context.Countries.FirstOrDefaultAsync(h => h.CountryId == id.Value);
+            if (country == null)
+            {
+                return NotFound();
+            }
+
+            _context.Countries.Remove(country);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

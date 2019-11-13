@@ -186,5 +186,23 @@ namespace MyPersonalWeb.Web.Controllers
         {
             return _context.UserManagers.Any(e => e.Id == id);
         }
+
+        public async Task<IActionResult> DeleteManagers(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var user = await _context.UserManagers.FirstOrDefaultAsync(h => h.Id == id.Value);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            _context.UserManagers.Remove(user);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
