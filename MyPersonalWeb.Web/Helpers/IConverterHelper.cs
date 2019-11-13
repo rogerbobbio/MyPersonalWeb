@@ -7,5 +7,7 @@ namespace MyPersonalWeb.Web.Helpers
     public interface IConverterHelper
     {
         Task<Team> ToTeamAsync(TeamViewModel model, bool isNew);
+
+        TeamViewModel ToTeamViewModel(Team team);
     }
 }

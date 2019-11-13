@@ -1,9 +1,6 @@
 ﻿using MyPersonalWeb.Web.Data;
 using MyPersonalWeb.Web.Data.Entities;
 using MyPersonalWeb.Web.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace MyPersonalWeb.Web.Helpers
@@ -27,6 +24,18 @@ namespace MyPersonalWeb.Web.Helpers
             };
 
             return team;
+        }
+
+        public TeamViewModel ToTeamViewModel(Team team)
+        {
+            return new TeamViewModel
+            {
+                Name = team.Name,
+                League = team.League,
+                TeamId = team.TeamId,
+                LeagueId = team.League.LeagueId,
+                LeagueName = team.League.Name
+            };
         }
     }
 }

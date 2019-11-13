@@ -58,7 +58,7 @@ namespace MyPersonalWeb.Web.Controllers
             {
                 if (LeagueNameExists(league.Name))
                 {
-                    ModelState.AddModelError(string.Empty, "La Liga ya existe");
+                    ModelState.AddModelError(string.Empty, "La Liga ya existe.");
                     return View(league);
                 }
 
@@ -191,6 +191,38 @@ namespace MyPersonalWeb.Web.Controllers
             {
                 var team = await _converterHelper.ToTeamAsync(model, true);
                 _context.Teams.Add(team);
+                await _context.SaveChangesAsync();
+                return RedirectToAction($"Details/{model.LeagueId}");
+            }
+            
+            return View(model);
+        }
+
+        public async Task<IActionResult> EditTeam(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var team = await _context.Teams
+                .Include(p => p.League)
+                .FirstOrDefaultAsync(p => p.TeamId == id);
+            if (team == null)
+            {
+                return NotFound();
+            }
+
+            return View(_converterHelper.ToTeamViewModel(team));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditTeam(TeamViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var team = await _converterHelper.ToTeamAsync(model, false);
+                _context.Teams.Update(team);
                 await _context.SaveChangesAsync();
                 return RedirectToAction($"Details/{model.LeagueId}");
             }

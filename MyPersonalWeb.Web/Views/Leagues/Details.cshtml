@@ -53,7 +53,7 @@ else
                         @Html.DisplayFor(modelItem => item.Name)
                     </td>
                     <td>
-                        <a asp-action="EditPet" asp-route-id="@item.TeamId" class="btn btn-warning">Edit Equipo</a>                        
+                        <a asp-action="EditTeam" asp-route-id="@item.TeamId" class="btn btn-warning">Edit Equipo</a>                        
                         <button data-id="@item.TeamId" class="btn btn-danger deleteItem" data-toggle="modal" data-target="#deleteDialog">Borrar Equipo</button>
                     </td>
                 </tr>
