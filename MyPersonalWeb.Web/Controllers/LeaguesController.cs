@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -30,7 +31,7 @@ namespace MyPersonalWeb.Web.Controllers
                 return NotFound();
             }
 
-            var league = await _context.Leagues
+            var league = await _context.Leagues.Include(t => t.Teams)
                 .FirstOrDefaultAsync(m => m.LeagueId == id);
             if (league == null)
             {
@@ -47,13 +48,21 @@ namespace MyPersonalWeb.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("LeagueId,Name")] League league)
+        public async Task<IActionResult> Create(League league)
         {
             if (ModelState.IsValid)
             {
                 _context.Add(league);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                try
+                {
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError(string.Empty, ex.ToString());
+                    return View(league);
+                }                
             }
             return View(league);
         }

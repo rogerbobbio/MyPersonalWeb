@@ -4,10 +4,10 @@
     ViewData["Title"] = "Details";
 }
 
-<h2>Details</h2>
+<h2>Detalles de Ligas</h2>
 
 <div>
-    <h4>League</h4>
+    <h4>Detalles</h4>
     <hr />
     <dl class="dl-horizontal">
         <dt>
@@ -16,9 +16,48 @@
         <dd>
             @Html.DisplayFor(model => model.Name)
         </dd>
+        <dt>
+            # Equipos
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Teams.Count)
+        </dd>
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model.LeagueId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Edit" asp-route-id="@Model.LeagueId" class="btn btn-warning">Edit</a>
+    <a asp-action="AddPet" asp-route-id="@Model.LeagueId" class="btn btn-primary">Agregar Equipo</a>
+    <a asp-action="Index" class="btn btn-success">Back to List</a>
 </div>
+<h4>Equipos</h4>
+@if (Model.Teams.Count == 0)
+{
+    <h5>No existen equipos.</h5>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Teams.FirstOrDefault().Name)
+                </th>                
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Teams)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Name)
+                    </td>
+                    <td>
+                        <a asp-action="EditPet" asp-route-id="@item.TeamId" class="btn btn-warning">Edit Equipo</a>                        
+                        <button data-id="@item.TeamId" class="btn btn-danger deleteItem" data-toggle="modal" data-target="#deleteDialog">Borrar Equipo</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

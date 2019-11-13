@@ -1,10 +1,14 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyPersonalWeb.Web.Data;
 using MyPersonalWeb.Web.Data.Entities;
+using MyPersonalWeb.Web.Helpers;
+using MyPersonalWeb.Web.Models;
 
 namespace MyPersonalWeb.Web.Controllers
 {
@@ -12,10 +16,12 @@ namespace MyPersonalWeb.Web.Controllers
     public class UserManagersController : Controller
     {
         private readonly DataContext _context;
+        private readonly IUserHelper _userHelper;
 
-        public UserManagersController(DataContext context)
+        public UserManagersController(DataContext context, IUserHelper userHelper)
         {
             _context = context;
+            _userHelper = userHelper;
         }
 
         public IActionResult Index()
@@ -30,7 +36,7 @@ namespace MyPersonalWeb.Web.Controllers
                 return NotFound();
             }
 
-            var userManager = await _context.UserManagers
+            var userManager = await _context.UserManagers.Include(u => u.User)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (userManager == null)
             {
@@ -47,17 +53,61 @@ namespace MyPersonalWeb.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id")] UserManager userManager)
+        public async Task<IActionResult> Create(AddUserViewModel model)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(userManager);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                var user = await AddUser(model);
+                if (user == null)
+                {
+                    return View(model);
+                }
+
+                var userManager = new UserManager
+                {
+                    User = user,
+                };
+
+                _context.UserManagers.Add(userManager);
+                try
+                {
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError(string.Empty, ex.ToString());
+                    return View(model);
+                }
             }
-            return View(userManager);
+            return View(model);
         }
-        
+
+        private async Task<User> AddUser(AddUserViewModel view)
+        {
+            var user = new User
+            {
+                Address = view.Address,
+                Document = view.Document,
+                Email = view.Username,
+                FirstName = view.FirstName,
+                LastName = view.LastName,
+                PhoneNumber = view.PhoneNumber,
+                UserName = view.Username
+            };
+
+            var result = await _userHelper.AddUserAsync(user, view.Password);
+            if (result != IdentityResult.Success)
+            {
+                ModelState.AddModelError(string.Empty, result.Errors.FirstOrDefault().Description);
+                return null;
+            }
+
+            var newUser = await _userHelper.GetUserByEmailAsync(view.Username);
+            await _userHelper.AddUserToRoleAsync(newUser, "Admin");
+            return newUser;
+        }
+
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
